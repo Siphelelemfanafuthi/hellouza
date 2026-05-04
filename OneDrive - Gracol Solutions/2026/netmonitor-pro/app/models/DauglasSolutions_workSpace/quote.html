@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dauglas Solutions - Quote Request</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="page-header">
+        <div class="container">
+            <h1>Request a Quote</h1>
+            <p>Complete the form below and our team will prepare a custom proposal for your IT, cyber security, or partner engagement needs.</p>
+            <p><a href="index.html" class="secondary-button">Back to Home</a></p>
+        </div>
+    </header>
+    <main class="page-content">
+        <div class="container">
+            <div class="page-form">
+                <form id="quoteForm">
+                    <div class="page-meta">
+                        <div class="meta-box">
+                            <strong>Fast response</strong>
+                            <p>We typically review quote forms within one business day.</p>
+                        </div>
+                        <div class="meta-box">
+                            <strong>Service options</strong>
+                            <p>Choose between Basic, Pro, Enterprise, or Partner-level support.</p>
+                        </div>
+                    </div>
+                    <label for="quoteName">Full Name</label>
+                    <input type="text" id="quoteName" name="name" placeholder="Your name" autocomplete="name" required>
+
+                    <label for="quoteEmail">Email</label>
+                    <input type="email" id="quoteEmail" name="email" placeholder="you@example.com" autocomplete="email" required>
+
+                    <label for="quotePhone">Phone</label>
+                    <input type="tel" id="quotePhone" name="phone" placeholder="062 500 1875" autocomplete="tel" inputmode="tel" pattern="[0-9\s\-\+\(\)]+" title="Please enter a valid phone number" required>
+
+                    <label for="quoteCompany">Company / Business</label>
+                    <input type="text" id="quoteCompany" name="company" placeholder="Company name or project name" autocomplete="organization" required>
+
+                    <label for="quotePackage">Quote Type</label>
+                    <select id="quotePackage" name="package" required>
+                        <option value="basic">Basic Helpdesk</option>
+                        <option value="pro">Pro Support</option>
+                        <option value="enterprise">Enterprise Partner</option>
+                        <option value="partner">Partner Request</option>
+                    </select>
+
+                    <label for="quoteDetails">Project or Support Details</label>
+                    <textarea id="quoteDetails" name="details" placeholder="Tell us about your project, issue, or partnership interest." required></textarea>
+
+                    <button type="submit">Send Quote Request</button>
+                </form>
+                <div id="quoteSuccess" class="page-success hidden"></div>
+            </div>
+        </div>
+    </main>
+    <script src="quote.js"></script>
+</body>
+</html>

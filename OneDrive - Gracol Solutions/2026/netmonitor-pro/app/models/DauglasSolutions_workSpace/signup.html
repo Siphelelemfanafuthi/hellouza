@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dauglas Solutions - Client Signup</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="page-header">
+        <div class="container">
+            <h1>Client Signup</h1>
+            <p>Register as a Dauglas Solutions member for faster support, access to our client portal, and priority communication.</p>
+            <p><a href="index.html" class="secondary-button">Back to Home</a></p>
+        </div>
+    </header>
+    <main class="page-content">
+        <div class="container">
+            <div class="page-form">
+                <form id="signupForm">
+                    <div class="page-meta">
+                        <div class="meta-box">
+                            <strong>Client onboarding</strong>
+                            <p>Get registered with our helpdesk and portal in one step.</p>
+                        </div>
+                        <div class="meta-box">
+                            <strong>Membership benefits</strong>
+                            <p>Priority quoting, dedicated support, and service status updates.</p>
+                        </div>
+                    </div>
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" placeholder="Your name" required>
+
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" placeholder="you@example.com" required>
+
+                    <label for="signupPhone">Phone</label>
+                    <input type="tel" id="signupPhone" placeholder="062 500 1875" required>
+
+                    <label for="signupCompany">Company / Business</label>
+                    <input type="text" id="signupCompany" placeholder="Company or project name" required>
+
+                    <label for="signupMessage">Tell us what you need</label>
+                    <textarea id="signupMessage" placeholder="Describe your onboarding or support needs." required></textarea>
+
+                    <button type="submit">Submit Signup Request</button>
+                </form>
+                <div id="signupSuccess" class="page-success hidden"></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function saveSignup(data) {
+            const signups = JSON.parse(localStorage.getItem('dauglasSignups') || '[]');
+            signups.push(data);
+            localStorage.setItem('dauglasSignups', JSON.stringify(signups));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const signupForm = document.getElementById('signupForm');
+            const signupSuccess = document.getElementById('signupSuccess');
+
+            signupForm.addEventListener('submit', event => {
+                event.preventDefault();
+                const signupData = {
+                    name: document.getElementById('signupName').value.trim(),
+                    email: document.getElementById('signupEmail').value.trim(),
+                    phone: document.getElementById('signupPhone').value.trim(),
+                    company: document.getElementById('signupCompany').value.trim(),
+                    message: document.getElementById('signupMessage').value.trim(),
+                    submittedAt: new Date().toISOString()
+                };
+                saveSignup(signupData);
+                signupForm.reset();
+                signupSuccess.classList.remove('hidden');
+                signupSuccess.textContent = `Thanks ${signupData.name}! Your signup request is complete. We will contact you at ${signupData.email} to finish registration.`;
+            });
+        });
+    </script>
+</body>
+</html>
