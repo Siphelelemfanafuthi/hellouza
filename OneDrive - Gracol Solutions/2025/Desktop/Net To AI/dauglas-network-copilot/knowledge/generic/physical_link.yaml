@@ -1,0 +1,167 @@
+pack_id: GENERIC-PHYSICAL-FIBRE
+version: "1.0.0"
+author: DAUGLAS engineering
+date_created: "2026-08-05"
+technical_domains: [PHYSICAL_LINK, FIBRE_OPTICS, INTERFACE_ERRORS]
+supported_vendors: [Huawei, Cisco]
+approval_status: APPROVED
+
+rules:
+  - rule_id: PHY-FLAP-001
+    title: Physical-link instability
+    domain: PHYSICAL_LINK
+    explanation: Repeated physical state transitions prove link instability but do not alone identify the failed component.
+    base_score: 42
+    trigger:
+      all:
+        - {fact: link_flaps_detected, operator: equals, value: true}
+    supporting:
+      - {fact: link_flaps_detected, operator: equals, value: true, weight: 28}
+      - {fact: crc_errors, operator: greater_than, value: 0, weight: 8}
+      - {fact: input_errors, operator: greater_than, value: 0, weight: 8}
+    contradicting:
+      - {fact: physical_state, operator: equals, value: UP, weight: 0}
+    required_evidence: [remote_link_events, error_counter_growth]
+    next_tests: [TEST-FLAP-FREQUENCY, TEST-INTERFACE-DETAIL, TEST-REMOTE-NEIGHBOR]
+    confirmation_requirements: [Repeated timestamped physical transitions or observed loss during a controlled test]
+
+  - rule_id: FIBRE-CRC-FLAP-001
+    title: Optical-path degradation
+    domain: FIBRE_OPTICS
+    explanation: Link flapping combined with CRC or input errors supports investigation of the optical path, but measured optical values and remote evidence are required for confirmation.
+    base_score: 30
+    trigger:
+      all:
+        - {fact: link_flaps_detected, operator: equals, value: true}
+      any:
+        - {fact: transceiver_type, operator: exists}
+        - {fact: reported_engineer_note, operator: contains, value: optical, reported_only: true}
+        - {fact: reported_engineer_note, operator: contains, value: fibre, reported_only: true}
+    supporting:
+      - {fact: link_flaps_detected, operator: equals, value: true, weight: 18}
+      - {fact: crc_errors, operator: greater_than, value: 0, weight: 14}
+      - {fact: input_errors, operator: greater_than, value: 0, weight: 10}
+      - {fact: rx_optical_power_dbm, operator: exists, weight: 5}
+      - {fact: reported_engineer_note, operator: contains, value: optical, weight: 3, reported_only: true}
+    contradicting:
+      - {fact: crc_errors, operator: equals, value: 0, weight: 8}
+    required_evidence: [rx_optical_power_dbm, tx_optical_power_dbm, transceiver_alarm_thresholds, remote_interface_errors, local_and_remote_sfp_part_numbers]
+    next_tests: [TEST-TRANSCEIVER-DIAGNOSTICS, TEST-REMOTE-NEIGHBOR, TEST-CLEAN-CONNECTORS]
+    confirmation_requirements: [Measured optical value outside the supported transceiver threshold, or physical-path test identifying excess loss]
+
+  - rule_id: FIBRE-CONNECTOR-001
+    title: Dirty, damaged, or poorly seated fibre connector
+    domain: FIBRE_OPTICS
+    explanation: Connector contamination or poor seating can cause intermittent optical loss and frame corruption.
+    base_score: 25
+    trigger:
+      all:
+        - {fact: link_flaps_detected, operator: equals, value: true}
+      any:
+        - {fact: transceiver_type, operator: exists}
+        - {fact: reported_engineer_note, operator: contains, value: fibre, reported_only: true}
+        - {fact: reported_engineer_note, operator: contains, value: optical, reported_only: true}
+    supporting:
+      - {fact: crc_errors, operator: greater_than, value: 0, weight: 12}
+      - {fact: input_errors, operator: greater_than, value: 0, weight: 8}
+    contradicting: []
+    required_evidence: [connector_inspection, before_after_optical_measurement]
+    next_tests: [TEST-CLEAN-CONNECTORS, TEST-TRANSCEIVER-DIAGNOSTICS]
+    confirmation_requirements: [Contamination or damage observed and link validated after controlled cleaning or replacement]
+
+  - rule_id: FIBRE-SFP-001
+    title: Failing or incompatible SFP
+    domain: FIBRE_OPTICS
+    explanation: A failing or mismatched transceiver can create repeated physical transitions and interface errors.
+    base_score: 24
+    trigger:
+      all:
+        - {fact: link_flaps_detected, operator: equals, value: true}
+      any:
+        - {fact: transceiver_type, operator: exists}
+        - {fact: reported_engineer_note, operator: contains, value: SFP, reported_only: true}
+    supporting:
+      - {fact: transceiver_type, operator: exists, weight: 5}
+      - {fact: crc_errors, operator: greater_than, value: 0, weight: 10}
+    contradicting: []
+    required_evidence: [local_and_remote_sfp_part_numbers, wavelength_and_media_type, transceiver_diagnostics, controlled_sfp_substitution]
+    next_tests: [TEST-TRANSCEIVER-DIAGNOSTICS, TEST-REMOTE-NEIGHBOR]
+    confirmation_requirements: [Compatibility mismatch proven or controlled SFP substitution resolves and validates the link]
+
+  - rule_id: PHY-REMOTE-END-001
+    title: Remote port or remote transceiver instability
+    domain: PHYSICAL_LINK
+    explanation: The far-end port or transceiver can produce the same locally observed physical symptoms.
+    base_score: 22
+    trigger:
+      all:
+        - {fact: link_flaps_detected, operator: equals, value: true}
+    supporting:
+      - {fact: crc_errors, operator: greater_than, value: 0, weight: 6}
+    contradicting: []
+    required_evidence: [remote_interface_state, remote_error_counters, remote_logs, remote_transceiver_diagnostics]
+    next_tests: [TEST-REMOTE-NEIGHBOR, TEST-REMOTE-INTERFACE]
+    confirmation_requirements: [Remote-side evidence or controlled substitution identifies the remote component]
+
+tests:
+  - test_id: TEST-FLAP-FREQUENCY
+    title: Confirm interface flap frequency
+    purpose: Establish the frequency and timestamps of physical transitions.
+    command_id:
+      Huawei: HUAWEI-LOGBUFFER-INTERFACE-001
+      Cisco: CISCO-LOGBUFFER-INTERFACE-001
+    risk: READ_ONLY
+    diagnostic_value: 76
+    healthy_result: No repeated physical UP/DOWN events are present.
+    fault_indication: Repeated physical transitions occur in the supplied interval.
+    decision: Correlate local and remote timestamps; if repeated, continue physical-path isolation.
+  - test_id: TEST-INTERFACE-DETAIL
+    title: Inspect detailed interface statistics
+    purpose: Establish current state, negotiation, and whether error counters increase.
+    command_id:
+      Huawei: HUAWEI-INTERFACE-DETAIL-001
+      Cisco: CISCO-INTERFACE-DETAIL-001
+    risk: READ_ONLY
+    diagnostic_value: 82
+    healthy_result: Stable UP state with matching speed/duplex and no increasing errors.
+    fault_indication: DOWN/flapping state, negotiation mismatch, or increasing CRC/input errors.
+    decision: Compare two timestamped counter samples and correlate with physical events.
+  - test_id: TEST-TRANSCEIVER-DIAGNOSTICS
+    title: Inspect model-supported transceiver diagnostics
+    purpose: Collect measured RX/TX power and the applicable alarm thresholds.
+    command_id: null
+    risk: READ_ONLY
+    diagnostic_value: 92
+    healthy_result: Values are within the exact transceiver's supported thresholds.
+    fault_indication: A value breaches or approaches its supported warning/alarm threshold.
+    decision: Confirm the exact model/software read-only command from the approved catalogue before execution.
+  - test_id: TEST-REMOTE-NEIGHBOR
+    title: Identify the remote neighbour and port
+    purpose: Establish the far endpoint for equivalent evidence collection.
+    command_id:
+      Huawei: HUAWEI-LLDP-INTERFACE-001
+      Cisco: CISCO-LLDP-INTERFACE-001
+    risk: READ_ONLY
+    diagnostic_value: 66
+    healthy_result: The expected stable neighbour and remote port are present.
+    fault_indication: The neighbour is absent, unexpected, or changes repeatedly.
+    decision: Collect remote interface, log, and transceiver evidence.
+  - test_id: TEST-CLEAN-CONNECTORS
+    title: Inspect and clean both fibre connectors
+    purpose: Eliminate contamination or poor seating while recording before/after measurements.
+    command_id: null
+    risk: LOW_RISK_CHANGE
+    diagnostic_value: 68
+    manual: true
+    healthy_result: Connectors are clean and the link remains stable after reseating.
+    fault_indication: Contamination/damage is found or instability continues.
+    decision: Record optical power before and after; change only one component at a time.
+  - test_id: TEST-REMOTE-INTERFACE
+    title: Inspect the remote interface
+    purpose: Compare far-end physical state, counters, logs, and optics.
+    command_id: null
+    risk: READ_ONLY
+    diagnostic_value: 80
+    healthy_result: Remote state and counters remain stable.
+    fault_indication: Remote transitions or errors correlate with the local incident.
+    decision: Use the remote vendor's approved command catalogue.

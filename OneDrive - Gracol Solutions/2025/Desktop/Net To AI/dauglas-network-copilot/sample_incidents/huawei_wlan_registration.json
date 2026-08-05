@@ -1,0 +1,14 @@
+{
+  "title": "Access points are not registering",
+  "client_alias": "SITE-A",
+  "vendor": "Huawei",
+  "device_type": "WAC",
+  "device_model": "Sanitized",
+  "expected_behavior": "FIT APs should register with the WAC.",
+  "actual_behavior": "The APs receive DHCP addresses, but remain offline.",
+  "last_known_working": "Unknown",
+  "description": "Multiple access points fail controller registration.",
+  "evidence": "GE0/0/23 UP UP\nPVID: 500",
+  "notes": "No credentials included.",
+  "service_impact": "Wireless service unavailable in the affected area."
+}

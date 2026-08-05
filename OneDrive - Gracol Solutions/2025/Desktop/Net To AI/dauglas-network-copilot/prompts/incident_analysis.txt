@@ -1,0 +1,1 @@
+Analyze the supplied network incident and identify likely causes, risks, and safe next actions.

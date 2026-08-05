@@ -1,0 +1,25 @@
+catalogue_version: "1.0.0"
+vendor: Huawei
+approved_by: DAUGLAS engineering
+commands:
+  - command_id: HUAWEI-INTERFACE-DETAIL-001
+    vendor: Huawei
+    intent: inspect_interface_detail
+    template: "display interface {interface}"
+    safety: READ_ONLY
+    supported_device_types: [Switch, Router]
+    requires_parameters: [interface]
+  - command_id: HUAWEI-LOGBUFFER-INTERFACE-001
+    vendor: Huawei
+    intent: inspect_interface_events
+    template: "display logbuffer | include {interface}"
+    safety: READ_ONLY
+    supported_device_types: [Switch, Router]
+    requires_parameters: [interface]
+  - command_id: HUAWEI-LLDP-INTERFACE-001
+    vendor: Huawei
+    intent: identify_remote_neighbor
+    template: "display lldp neighbor interface {interface} verbose"
+    safety: READ_ONLY
+    supported_device_types: [Switch, Router]
+    requires_parameters: [interface]

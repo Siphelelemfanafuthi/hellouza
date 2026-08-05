@@ -1,0 +1,25 @@
+catalogue_version: "1.0.0"
+vendor: Cisco
+approved_by: DAUGLAS engineering
+commands:
+  - command_id: CISCO-INTERFACE-DETAIL-001
+    vendor: Cisco
+    intent: inspect_interface_detail
+    template: "show interface {interface}"
+    safety: READ_ONLY
+    supported_device_types: [Switch, Router]
+    requires_parameters: [interface]
+  - command_id: CISCO-LOGBUFFER-INTERFACE-001
+    vendor: Cisco
+    intent: inspect_interface_events
+    template: "show logging | include {interface}"
+    safety: READ_ONLY
+    supported_device_types: [Switch, Router]
+    requires_parameters: [interface]
+  - command_id: CISCO-LLDP-INTERFACE-001
+    vendor: Cisco
+    intent: identify_remote_neighbor
+    template: "show lldp neighbors interface {interface} detail"
+    safety: READ_ONLY
+    supported_device_types: [Switch, Router]
+    requires_parameters: [interface]
